@@ -4,7 +4,16 @@ import { GoogleGenAI } from "@google/genai";
 import { Report } from "../types";
 
 // Fix: Always use const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Khởi tạo khi cần: nếu bản build không có khóa API (ví dụ trên GitHub Pages),
+// thư viện sẽ báo lỗi ngay khi tạo — bắt lỗi để cả trang không bị trắng.
+let _ai: GoogleGenAI | null = null;
+const getAI = (): GoogleGenAI => {
+  if (!_ai) {
+    if (!process.env.API_KEY) throw new Error('Chưa cấu hình khóa Gemini API');
+    _ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return _ai;
+};
 
 // Firestore chỉ cho phép aiSummary dưới 2000 ký tự — cắt bớt để không làm hỏng việc lưu đơn
 const AI_SUMMARY_MAX = 1950;
@@ -46,7 +55,7 @@ export const analyzeReport = async (report: Partial<Report>) => {
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -70,7 +79,7 @@ export const analyzeReport = async (report: Partial<Report>) => {
 
 export const getLegalGuidance = async (history: { role: 'user' | 'model', parts: { text: string }[] }[]) => {
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       // Fix: Use gemini-3-pro-preview for complex legal reasoning tasks
       model: 'gemini-3-pro-preview',
       // Fix: Correctly map history to Content array instead of flattening parts
