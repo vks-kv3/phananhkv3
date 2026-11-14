@@ -86,7 +86,21 @@ service cloud.firestore {
         (!('aiSummary' in data) || (data.aiSummary is string && data.aiSummary.size() < 2000)) &&
         (!('attachments' in data) || data.attachments is list) &&
         (!('resolutionResponse' in data) || (data.resolutionResponse is string && data.resolutionResponse.size() < 5000)) &&
-        (!('resolutionAttachments' in data) || data.resolutionAttachments is list);
+        (!('resolutionAttachments' in data) || data.resolutionAttachments is list) &&
+        (!('trackingCode' in data) || isValidTrackingCode(data.trackingCode));
+    }
+
+    function isValidTrackingCode(code) {
+      return code is string && code.matches("^KV3-[A-Z0-9]{4}-[A-Z0-9]{4}$");
+    }
+
+    function isValidTrackingRecord(code, data) {
+      return data.keys().hasOnly(['code', 'status', 'createdAt', 'updatedAt', 'resolutionResponse']) &&
+        data.keys().hasAll(['code', 'status', 'createdAt', 'updatedAt']) &&
+        isValidTrackingCode(code) && data.code == code &&
+        data.status in ['Chờ tiếp nhận', 'Đang xử lý', 'Đã giải quyết'] &&
+        isValidDateString(data.createdAt) && isValidDateString(data.updatedAt) &&
+        (!('resolutionResponse' in data) || (data.resolutionResponse is string && data.resolutionResponse.size() < 5000));
     }
 
     match /reports/{reportId} {
@@ -101,6 +115,20 @@ service cloud.firestore {
       allow update: if isAdmin() && isValidReport(request.resource.data);
       
       // No one can delete reports for audit trail
+      allow delete: if false;
+    }
+
+    // Bản ghi tra cứu công khai: chỉ có trạng thái và nội dung trả lời, không có thông tin cá nhân.
+    match /tracking/{code} {
+      // Ai có đúng mã thì xem được một bản ghi; KHÔNG cho liệt kê toàn bộ
+      allow get: if true;
+      allow list: if false;
+      // Người dân chỉ được tạo bản ghi mới ở trạng thái "Chờ tiếp nhận", chưa có trả lời
+      allow create: if isValidTrackingRecord(code, request.resource.data) &&
+        request.resource.data.status == 'Chờ tiếp nhận' &&
+        !('resolutionResponse' in request.resource.data);
+      // Chỉ cán bộ được cập nhật trạng thái, trả lời
+      allow update: if isAdmin() && isValidTrackingRecord(code, request.resource.data);
       allow delete: if false;
     }
 

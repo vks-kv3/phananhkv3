@@ -86,6 +86,12 @@ export const Home: React.FC = () => {
           <ArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" size={20} />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         </button>
+        <button
+          onClick={() => navigate('/tra-cuu')}
+          className="mt-3 w-full py-4 bg-white border-2 border-red-700 text-red-700 rounded-2xl font-black text-sm uppercase tracking-[0.15em] hover:bg-red-50 transition-all"
+        >
+          Tra cứu tiến độ đơn đã gửi
+        </button>
       </div>
     </div>
   );

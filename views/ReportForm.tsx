@@ -1,16 +1,18 @@
 
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, CheckCircle2, User, UserX, FileText, AlertCircle, Info, Paperclip, X, File, Image as ImageIcon, Film, MapPin } from 'lucide-react';
+import { Send, CheckCircle2, Copy, Search, User, UserX, FileText, AlertCircle, Info, Paperclip, X, File, Image as ImageIcon, Film, MapPin } from 'lucide-react';
 import { ReportTargetType, ReportStatus, VULNERABLE_GROUPS, PUBLIC_INTEREST_GROUPS, Report, Attachment } from '../types';
 import { analyzeReport } from '../services/geminiService';
-import { saveReport } from '../services/storageService';
+import { saveReport, createTrackingRecord, generateTrackingCode } from '../services/storageService';
 
 export const ReportForm: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [trackingCode, setTrackingCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   
@@ -120,9 +122,19 @@ export const ReportForm: React.FC = () => {
         createdAt: new Date().toISOString(),
         aiSummary: aiSummary,
         attachments: attachments,
+        trackingCode: generateTrackingCode(),
       };
+      // Bỏ email nếu để trống: quy tắc Firestore chỉ chấp nhận email đúng định dạng,
+      // gửi chuỗi rỗng sẽ khiến cả đơn bị từ chối lưu.
+      if (!newReport.email || !newReport.email.trim()) {
+        delete newReport.email;
+      } else {
+        newReport.email = newReport.email.trim();
+      }
 
       await saveReport(newReport);
+      const trackingOk = await createTrackingRecord(newReport);
+      setTrackingCode(trackingOk ? newReport.trackingCode! : null);
 
       setSubmitted(true);
       // Removed the auto-navigate to /my-reports as it's not implemented yet
@@ -143,6 +155,32 @@ export const ReportForm: React.FC = () => {
         </div>
         <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Tiếp nhận thành công!</h2>
         <p className="text-sm text-gray-500 px-6">Thông tin phản ánh và tài liệu đính kèm đã được lưu trữ an toàn trên hệ thống.</p>
+        {trackingCode && (
+          <div className="w-full bg-red-50 border-2 border-dashed border-red-200 rounded-2xl p-5 space-y-3">
+            <p className="text-[10px] font-black text-red-800 uppercase tracking-widest">Mã tra cứu của bạn</p>
+            <p className="text-2xl font-black text-red-900 tracking-[0.15em] font-mono select-all">{trackingCode}</p>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard?.writeText(trackingCode).then(() => setCopied(true)).catch(() => {});
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-800 rounded-xl text-[10px] font-black uppercase tracking-widest"
+            >
+              <Copy size={14} /> {copied ? 'Đã sao chép' : 'Sao chép mã'}
+            </button>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              Vui lòng ghi lại hoặc chụp màn hình mã này. Dùng mã tại mục <b>Tra cứu</b> để theo dõi tiến độ và nhận nội dung trả lời của Viện kiểm sát.
+            </p>
+          </div>
+        )}
+        {trackingCode && (
+          <button
+            onClick={() => navigate(`/tra-cuu?ma=${encodeURIComponent(trackingCode)}`)}
+            className="px-8 py-4 bg-white border-2 border-red-900 text-red-900 font-black rounded-2xl uppercase tracking-widest text-xs flex items-center gap-2"
+          >
+            <Search size={16} /> Tra cứu tiến độ
+          </button>
+        )}
         <button 
           onClick={() => navigate('/')}
           className="px-8 py-4 bg-red-900 text-white font-black rounded-2xl uppercase tracking-widest text-xs shadow-xl shadow-red-100"
