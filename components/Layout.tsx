@@ -26,7 +26,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <header className="bg-white/80 md:bg-white backdrop-blur-md border-b h-14 md:h-20 flex items-center justify-between px-3 md:px-8 sticky top-0 z-50 md:shadow-sm">
           <div className="w-full md:max-w-6xl md:mx-auto flex items-center justify-between gap-6">
             <Link to="/" className="flex items-center gap-2 md:gap-3 overflow-hidden flex-1">
-              <div className="bg-red-50 p-1 md:p-1.5 rounded-lg shrink-0">
+              <div className="shrink-0">
                 <span className="md:hidden"><Logo size={24} /></span>
                 <span className="hidden md:block"><Logo size={40} /></span>
               </div>
