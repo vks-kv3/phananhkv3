@@ -155,8 +155,8 @@ export const AdminDashboard = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 bg-red-900 text-white p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="col-span-2 md:col-span-1 bg-red-900 text-white p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-200 mb-1">Tổng số đơn phản ánh</p>
             <p className="text-5xl font-black tracking-tighter">{reports.length}</p>
@@ -168,7 +168,7 @@ export const AdminDashboard = () => {
         </div>
 
         {stats.map((stat, i) => (
-          <div key={i} className={`bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col gap-3 ${i === 2 ? 'col-span-2' : ''}`}>
+          <div key={i} className={`bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col gap-3 ${i === 2 ? 'col-span-2 md:col-span-1' : ''}`}>
             <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color}`}>
               {stat.icon}
             </div>
@@ -188,9 +188,9 @@ export const AdminDashboard = () => {
           </h3>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3">
           {reports.length === 0 ? (
-            <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-gray-200">
+            <div className="md:col-span-2 text-center py-10 bg-white rounded-3xl border border-dashed border-gray-200">
               <p className="text-xs text-gray-400 font-bold uppercase">Chưa có dữ liệu phản ánh</p>
             </div>
           ) : (
@@ -224,7 +224,7 @@ export const AdminDashboard = () => {
       {selectedReport && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end md:items-center justify-center p-4" onClick={() => setSelectedReport(null)}>
           <div 
-            className="bg-white w-full max-w-[440px] rounded-t-[3rem] md:rounded-[3rem] p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 shadow-2xl"
+            className="bg-white w-full max-w-[440px] md:max-w-3xl rounded-t-[3rem] md:rounded-[3rem] p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-between items-start border-b pb-4">

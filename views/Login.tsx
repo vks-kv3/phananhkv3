@@ -37,7 +37,7 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center">
-      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="w-full md:max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="text-center space-y-4">
           <div className="inline-flex p-4 bg-white rounded-3xl shadow-xl border border-red-50">
             <Logo size={80} />

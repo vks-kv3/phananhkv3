@@ -9,3 +9,13 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
 }
+
+/* Máy tính, laptop (từ 768px): phóng chữ cỡ nhỏ vốn thiết kế cho điện thoại */
+@media (min-width: 768px) {
+  .desktop-scale .text-\[8px\]  { font-size: 11px; }
+  .desktop-scale .text-\[9px\]  { font-size: 12px; }
+  .desktop-scale .text-\[10px\] { font-size: 13px; }
+  .desktop-scale .text-\[11px\] { font-size: 14px; }
+  .desktop-scale .text-\[12px\] { font-size: 15px; }
+  .desktop-scale .text-xs        { font-size: 0.875rem; line-height: 1.25rem; }
+}

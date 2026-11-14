@@ -149,7 +149,7 @@ export const ReportForm: React.FC = () => {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center animate-in fade-in zoom-in duration-500">
+      <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center md:max-w-xl md:mx-auto animate-in fade-in zoom-in duration-500">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
           <CheckCircle2 size={40} className="text-green-600" />
         </div>
@@ -192,7 +192,7 @@ export const ReportForm: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:max-w-3xl md:mx-auto">
       <div className="text-center pt-4">
         <h1 className="text-xl font-black text-gray-900 uppercase tracking-widest">Nội dung phản ánh</h1>
         <div className="h-1 w-12 bg-red-600 mx-auto mt-2 rounded-full" />

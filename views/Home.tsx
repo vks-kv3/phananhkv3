@@ -10,43 +10,64 @@ export const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'vulnerable' | 'public'>('vulnerable');
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-12 md:items-center md:min-h-[60vh]">
+      {/* Điện thoại: 'contents' để các khối con xếp theo thứ tự order; máy tính: cột trái */}
+      <div className="contents md:block md:space-y-6">
       {/* Header Section */}
-      <section className="text-center space-y-6 pt-4 pb-2">
+      <section className="order-1 text-center md:text-left space-y-6 pt-4 pb-2">
         <div className="inline-flex items-center justify-center p-4 bg-white rounded-[2.5rem] shadow-xl border border-red-50 animate-in fade-in zoom-in duration-700">
           <Logo size={110} />
         </div>
-        <div className="space-y-2 px-2">
+        <div className="space-y-2 px-2 md:px-0">
           <h2 className="text-red-900 font-black text-lg uppercase tracking-tight leading-tight">
             Viện kiểm sát nhân dân tỉnh Quảng Trị
           </h2>
-          <h3 className="text-gray-700 font-bold text-base uppercase tracking-normal whitespace-nowrap">
+          <h3 className="text-gray-700 font-bold text-base md:text-lg uppercase tracking-normal whitespace-nowrap">
             Viện kiểm sát nhân dân khu vực 3
           </h3>
           <div className="pt-2">
-            <h1 className="text-red-700 font-black text-2xl uppercase tracking-widest leading-none">
+            <h1 className="text-red-700 font-black text-2xl md:text-4xl uppercase tracking-widest md:tracking-wide leading-none">
               Cổng Tiếp nhận Phản ánh
             </h1>
           </div>
         </div>
-        <p className="text-gray-500 italic text-xs leading-relaxed px-6">
+        <p className="text-gray-500 italic text-xs md:text-base leading-relaxed px-6 md:px-0">
           Tiếp nhận phản ánh nhằm bảo vệ quyền dân sự của các chủ thể là nhóm dễ bị tổn thương, bảo vệ lợi ích công khi không có người khởi kiện.
         </p>
       </section>
 
+      {/* Call to Action */}
+      <div className="order-3 flex flex-col items-center md:items-stretch py-4 md:max-w-md">
+        <button 
+          onClick={() => navigate('/report')}
+          className="group relative w-full py-5 bg-red-700 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-800 transition-all flex items-center justify-center gap-3 overflow-hidden"
+        >
+          <span className="relative z-10 uppercase tracking-[0.15em]">Bắt đầu phản ánh</span>
+          <ArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" size={20} />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+        </button>
+        <button
+          onClick={() => navigate('/tra-cuu')}
+          className="mt-3 w-full py-4 bg-white border-2 border-red-700 text-red-700 rounded-2xl font-black text-sm uppercase tracking-[0.15em] hover:bg-red-50 transition-all"
+        >
+          Tra cứu tiến độ đơn đã gửi
+        </button>
+      </div>
+      </div>
+
       {/* Explanation Section */}
-      <section className="bg-white rounded-[2rem] shadow-lg border border-gray-100 overflow-hidden">
+      <section className="order-2 bg-white rounded-[2rem] shadow-lg border border-gray-100 overflow-hidden">
         <div className="flex border-b">
           <button 
             onClick={() => setActiveTab('vulnerable')}
-            className={`flex-1 py-4 px-2 font-bold text-[8px] flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'vulnerable' ? 'bg-red-700 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
+            className={`flex-1 py-4 px-2 font-bold text-[8px] md:text-xs flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'vulnerable' ? 'bg-red-700 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
           >
             <CircleUsers size={16} />
             BẢO VỆ NHÓM DỄ BỊ TỔN THƯƠNG
           </button>
           <button 
             onClick={() => setActiveTab('public')}
-            className={`flex-1 py-4 px-2 font-bold text-[8px] flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'public' ? 'bg-indigo-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
+            className={`flex-1 py-4 px-2 font-bold text-[8px] md:text-xs flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'public' ? 'bg-indigo-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
           >
             <Globe size={16} />
             BẢO VỆ LỢI ÍCH CÔNG
@@ -76,23 +97,6 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <div className="flex flex-col items-center py-4">
-        <button 
-          onClick={() => navigate('/report')}
-          className="group relative w-full py-5 bg-red-700 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-800 transition-all flex items-center justify-center gap-3 overflow-hidden"
-        >
-          <span className="relative z-10 uppercase tracking-[0.15em]">Bắt đầu phản ánh</span>
-          <ArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" size={20} />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        </button>
-        <button
-          onClick={() => navigate('/tra-cuu')}
-          className="mt-3 w-full py-4 bg-white border-2 border-red-700 text-red-700 rounded-2xl font-black text-sm uppercase tracking-[0.15em] hover:bg-red-50 transition-all"
-        >
-          Tra cứu tiến độ đơn đã gửi
-        </button>
-      </div>
     </div>
   );
 };

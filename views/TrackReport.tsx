@@ -54,7 +54,7 @@ export const TrackReport: React.FC = () => {
   const currentStep = record ? STEPS.findIndex(s => s.status === record.status) : -1;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:max-w-2xl md:mx-auto">
       <div className="text-center pt-4">
         <h1 className="text-xl font-black text-gray-900 uppercase tracking-widest">Tra cứu tiến độ</h1>
         <div className="h-1 w-12 bg-red-600 mx-auto mt-2 rounded-full" />
