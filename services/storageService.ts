@@ -13,9 +13,28 @@ import {
   getDocFromServer
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Report, ReportStatus, Attachment } from '../types';
+import { Report, ReportStatus, Attachment, TrackingRecord } from '../types';
 
 const COLLECTION_NAME = 'reports';
+const TRACKING_COLLECTION = 'tracking';
+
+// Bảng chữ không có ký tự dễ nhầm (0/O, 1/I/L) để người dân đọc, chép lại dễ dàng
+const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+// Sinh mã tra cứu dạng KV3-XXXX-XXXX (khoảng 850 tỷ tổ hợp, không đoán được)
+export const generateTrackingCode = (): string => {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const chars = Array.from(bytes, b => CODE_ALPHABET[b % CODE_ALPHABET.length]).join('');
+  return `KV3-${chars.slice(0, 4)}-${chars.slice(4)}`;
+};
+
+// Chuẩn hoá mã người dân nhập: bỏ khoảng trắng, viết hoa, tự thêm dấu gạch
+export const normalizeTrackingCode = (input: string): string => {
+  const raw = input.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^KV3/, '');
+  if (raw.length !== 8) return input.trim().toUpperCase();
+  return `KV3-${raw.slice(0, 4)}-${raw.slice(4)}`;
+};
 
 enum OperationType {
   CREATE = 'create',
@@ -89,6 +108,30 @@ export const saveReport = async (report: Report): Promise<void> => {
   }
 };
 
+// Tạo bản ghi tra cứu công khai. Lỗi ở bước này KHÔNG làm hỏng việc gửi đơn
+// (ví dụ khi quy tắc Firestore mới chưa được triển khai) — chỉ trả về false.
+export const createTrackingRecord = async (report: Report): Promise<boolean> => {
+  if (!report.trackingCode) return false;
+  const record: TrackingRecord = {
+    code: report.trackingCode,
+    status: report.status,
+    createdAt: report.createdAt,
+    updatedAt: report.createdAt,
+  };
+  try {
+    await setDoc(doc(db, TRACKING_COLLECTION, report.trackingCode), record);
+    return true;
+  } catch (error) {
+    console.error('Không tạo được mã tra cứu:', error);
+    return false;
+  }
+};
+
+export const getTrackingRecord = async (code: string): Promise<TrackingRecord | null> => {
+  const snap = await getDoc(doc(db, TRACKING_COLLECTION, normalizeTrackingCode(code)));
+  return snap.exists() ? (snap.data() as TrackingRecord) : null;
+};
+
 export const getAllReports = async (): Promise<Report[]> => {
   try {
     const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
@@ -114,7 +157,8 @@ export const updateReportStatus = async (
   id: string, 
   status: ReportStatus, 
   resolutionResponse?: string,
-  resolutionAttachments?: Attachment[]
+  resolutionAttachments?: Attachment[],
+  trackingCode?: string
 ): Promise<void> => {
   try {
     const reportRef = doc(db, COLLECTION_NAME, id);
@@ -130,5 +174,16 @@ export const updateReportStatus = async (
     await updateDoc(reportRef, updateData);
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+  }
+
+  // Đồng bộ trạng thái sang bản ghi tra cứu công khai (không chặn nếu lỗi)
+  if (trackingCode) {
+    try {
+      const trackingUpdate: Partial<TrackingRecord> = { status, updatedAt: new Date().toISOString() };
+      if (resolutionResponse !== undefined) trackingUpdate.resolutionResponse = resolutionResponse;
+      await updateDoc(doc(db, TRACKING_COLLECTION, trackingCode), trackingUpdate);
+    } catch (error) {
+      console.error('Không cập nhật được bản ghi tra cứu:', error);
+    }
   }
 };

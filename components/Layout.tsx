@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FileText, LayoutDashboard, LogOut, Phone } from 'lucide-react';
+import { FileText, LayoutDashboard, LogOut, Phone, Search } from 'lucide-react';
 import { Logo } from './Logo';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -13,6 +13,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navItems = [
     { path: '/', label: 'Trang chủ', icon: <LayoutDashboard size={20} /> },
     { path: '/report', label: 'Phản ánh', icon: <FileText size={20} /> },
+    { path: '/tra-cuu', label: 'Tra cứu', icon: <Search size={20} /> },
     { path: isLoggedIn ? '/admin' : '/login', label: 'Cán bộ', icon: <Logo size={20} /> },
   ];
 

@@ -55,4 +55,15 @@ export interface Report {
   attachments?: Attachment[];
   resolutionResponse?: string; // Nội dung trả lời giải quyết từ VKS
   resolutionAttachments?: Attachment[]; // Tài liệu đính kèm trả lời giải quyết
+  trackingCode?: string; // Mã tra cứu cấp cho người dân sau khi gửi đơn
+}
+
+// Bản ghi công khai để người dân tra cứu tiến độ bằng mã số.
+// Chỉ chứa trạng thái và nội dung trả lời, KHÔNG chứa thông tin cá nhân.
+export interface TrackingRecord {
+  code: string;
+  status: ReportStatus;
+  createdAt: string;
+  updatedAt: string;
+  resolutionResponse?: string;
 }

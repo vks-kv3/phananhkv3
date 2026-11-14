@@ -56,6 +56,7 @@ export const AdminDashboard = () => {
   };
 
   const handleUpdateStatus = async (reportId: string, newStatus: ReportStatus) => {
+    const trackingCode = reports.find(r => r.id === reportId)?.trackingCode;
     if (newStatus === ReportStatus.RESOLVED && !resResponse.trim()) {
       alert("Vui lòng nhập nội dung trả lời giải quyết cho người dân.");
       return;
@@ -63,7 +64,7 @@ export const AdminDashboard = () => {
 
     try {
       const resolutionAttachments = newStatus === ReportStatus.RESOLVED ? resAttachments : undefined;
-      await dbUpdateStatus(reportId, newStatus, newStatus === ReportStatus.RESOLVED ? resResponse : undefined, resolutionAttachments);
+      await dbUpdateStatus(reportId, newStatus, newStatus === ReportStatus.RESOLVED ? resResponse : undefined, resolutionAttachments, trackingCode);
       
       const updatedReports = reports.map(report => 
         report.id === reportId ? { 
@@ -236,6 +237,9 @@ export const AdminDashboard = () => {
                   {selectedReport.status}
                 </span>
                 <h3 className="text-xl font-black text-gray-900 uppercase leading-tight mt-2">{selectedReport.title}</h3>
+                {selectedReport.trackingCode && (
+                  <p className="text-[10px] text-gray-500 font-mono">Mã tra cứu: <b className="text-gray-800">{selectedReport.trackingCode}</b></p>
+                )}
               </div>
               <button onClick={() => setSelectedReport(null)} className="p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-900 transition-colors font-bold text-xl">×</button>
             </div>
@@ -246,7 +250,7 @@ export const AdminDashboard = () => {
                 <div className="flex items-center gap-2 text-[10px] font-black text-red-800 uppercase tracking-widest">
                   <MessageSquare size={14} /> AI Phân tích & Tóm tắt
                 </div>
-                <p className="text-[11px] text-red-900 leading-relaxed italic">
+                <p className="text-[11px] text-red-900 leading-relaxed italic whitespace-pre-wrap">
                   {selectedReport.aiSummary || "Đang phân tích..."}
                 </p>
               </div>

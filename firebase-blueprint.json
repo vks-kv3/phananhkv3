@@ -33,6 +33,7 @@
             }
           }
         },
+        "trackingCode": { "type": "string" },
         "resolutionResponse": { "type": "string" },
         "resolutionAttachments": {
           "type": "array",
@@ -48,12 +49,29 @@
         }
       },
       "required": ["id", "targetType", "subCategory", "citizenName", "birthYear", "address", "phoneNumber", "targetName", "targetAddress", "title", "description", "status", "createdAt"]
+    },
+    "TrackingRecord": {
+      "title": "TrackingRecord",
+      "description": "Public status record a citizen looks up by tracking code. Contains no personal data.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "status": { "type": "string", "enum": ["Chờ tiếp nhận", "Đang xử lý", "Đã giải quyết"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "resolutionResponse": { "type": "string" }
+      },
+      "required": ["code", "status", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
     "reports": {
       "schema": "Report",
       "description": "Collection of reports submitted by citizens."
+    },
+    "tracking": {
+      "schema": "TrackingRecord",
+      "description": "Public tracking records keyed by tracking code (get only, no list)."
     }
   }
 }

@@ -6,6 +6,7 @@ import { Home } from './views/Home';
 import { ReportForm } from './views/ReportForm';
 import { AdminDashboard } from './views/AdminDashboard';
 import { Login } from './views/Login';
+import { TrackReport } from './views/TrackReport';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -47,6 +48,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/report" element={<ReportForm />} />
+          <Route path="/tra-cuu" element={<TrackReport />} />
           <Route path="/login" element={<Login />} />
           <Route 
             path="/admin" 
