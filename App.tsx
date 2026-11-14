@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === 'vkskv3qtri@gmail.com') {
+      if (user && user.email === 'vksndthixabadon@gmail.com') {
         setIsLoggedIn(true);
         sessionStorage.setItem('isLoggedIn', 'true');
       } else {

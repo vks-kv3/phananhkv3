@@ -6,6 +6,17 @@ import { ReportTargetType, ReportStatus, VULNERABLE_GROUPS, PUBLIC_INTEREST_GROU
 import { analyzeReport } from '../services/geminiService';
 import { saveReport, createTrackingRecord, generateTrackingCode } from '../services/storageService';
 
+// Dòng chú thích hướng dẫn người dân điền đơn
+const Hint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="text-[11px] text-gray-500 leading-relaxed flex gap-1.5">
+    <Info size={13} className="shrink-0 mt-0.5 text-gray-400" />
+    <span>{children}</span>
+  </p>
+);
+
+// Giới hạn tổng dung lượng tệp: Firestore chỉ lưu tối đa 1 MB mỗi đơn
+const MAX_ATTACH_BYTES = 700 * 1024;
+
 export const ReportForm: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,6 +117,13 @@ export const ReportForm: React.FC = () => {
     // 3. Xác thực Số điện thoại (chỉ chứa số)
     if (formData.phoneNumber && !isNumeric(formData.phoneNumber)) {
       setValidationError("Ô Số điện thoại không chứa ký tự chữ.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const totalSize = attachments.reduce((sum, f) => sum + f.size, 0);
+    if (totalSize > MAX_ATTACH_BYTES) {
+      setValidationError("Tổng dung lượng tệp đính kèm vượt quá 700 KB. Vui lòng bớt tệp hoặc chọn ảnh nhỏ hơn.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -214,6 +232,10 @@ export const ReportForm: React.FC = () => {
             </h3>
             <span className="text-[9px] font-black text-white uppercase tracking-widest bg-red-600 px-2 py-0.5 rounded-full">Bắt buộc</span>
           </div>
+
+          <Hint>
+            <b className="text-gray-700">Bạn (hoặc người bạn phản ánh thay) thuộc nhóm đối tượng bảo vệ nào?</b> Nhấn chọn một trong hai ô dưới đây.
+          </Hint>
           
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -226,6 +248,7 @@ export const ReportForm: React.FC = () => {
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.targetType === ReportTargetType.VULNERABLE ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-400'}`}>1</div>
               <div className="font-bold text-[9px] text-gray-900 uppercase leading-tight">Nhóm dễ bị<br/>tổn thương</div>
+              <div className="text-[9px] text-gray-500 leading-snug normal-case">Trẻ em, người cao tuổi, người khuyết tật, phụ nữ mang thai, nuôi con nhỏ…</div>
             </button>
             <button
               type="button"
@@ -237,6 +260,7 @@ export const ReportForm: React.FC = () => {
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.targetType === ReportTargetType.PUBLIC_INTEREST ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-400'}`}>2</div>
               <div className="font-bold text-[9px] text-gray-900 uppercase leading-tight">Lợi ích<br/>công cộng</div>
+              <div className="text-[9px] text-gray-500 leading-snug normal-case">Đất đai, môi trường, đầu tư công, an toàn thực phẩm, di sản văn hóa…</div>
             </button>
           </div>
 
@@ -244,6 +268,11 @@ export const ReportForm: React.FC = () => {
             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
               Danh mục chi tiết <span className="text-red-600">*</span>
             </label>
+            <Hint>
+              {formData.targetType
+                ? 'Chọn đúng nhóm đối tượng hoặc lĩnh vực cụ thể của vụ việc.'
+                : 'Hãy chọn Mục tiêu bảo vệ ở trên trước, danh sách sẽ hiện ra tại đây.'}
+            </Hint>
             <select 
               value={formData.subCategory}
               disabled={!formData.targetType}
@@ -269,6 +298,9 @@ export const ReportForm: React.FC = () => {
           <h3 className="text-sm font-black flex items-center gap-2 text-gray-800 uppercase tracking-wider">
             <User size={18} className="text-red-700" /> Người phản ánh <span className="text-red-600">*</span>
           </h3>
+          <Hint>
+            Thông tin của người gửi đơn để Viện kiểm sát liên hệ, xác minh khi cần. Thông tin cá nhân được giữ bí mật, chỉ cán bộ thụ lý được xem.
+          </Hint>
           <div className="space-y-4">
             <input required type="text" placeholder="Họ và tên" value={formData.citizenName} onChange={(e) => setFormData({...formData, citizenName: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
             <div className="grid grid-cols-2 gap-4">
@@ -285,6 +317,7 @@ export const ReportForm: React.FC = () => {
                   }} 
                   className={`w-full p-3 bg-gray-50 border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Năm sinh") ? 'border-red-500 bg-red-50' : 'border-gray-100'}`} 
                 />
+                <p className="text-[10px] text-gray-400 pl-1">4 chữ số, ví dụ: 1985</p>
               </div>
               <div className="space-y-1">
                 <input 
@@ -299,9 +332,17 @@ export const ReportForm: React.FC = () => {
                   }} 
                   className={`w-full p-3 bg-gray-50 border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Số điện thoại") ? 'border-red-500 bg-red-50' : 'border-gray-100'}`} 
                 />
+                <p className="text-[10px] text-gray-400 pl-1">Chỉ nhập số, ví dụ: 0912345678</p>
               </div>
             </div>
-            <input required type="text" placeholder="Địa chỉ thường trú" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+            <div className="space-y-1">
+              <input required type="text" placeholder="Địa chỉ thường trú" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <p className="text-[10px] text-gray-400 pl-1">Ghi rõ thôn/tổ dân phố, xã/phường, tỉnh</p>
+            </div>
+            <div className="space-y-1">
+              <input type="email" placeholder="Email (không bắt buộc)" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <p className="text-[10px] text-gray-400 pl-1">Có thể bỏ trống</p>
+            </div>
           </div>
         </div>
 
@@ -310,6 +351,9 @@ export const ReportForm: React.FC = () => {
           <h3 className="text-sm font-black flex items-center gap-2 text-gray-800 uppercase tracking-wider">
             <UserX size={18} className="text-red-700" /> Đối tượng bị phản ánh <span className="text-red-600">*</span>
           </h3>
+          <Hint>
+            Cơ quan, tổ chức hoặc cá nhân có hành vi xâm phạm quyền, lợi ích được bảo vệ. Nếu không biết tên chính xác, hãy ghi đặc điểm nhận biết (ví dụ: "cơ sở sản xuất gần cầu X").
+          </Hint>
           <div className="space-y-4">
             <div className="relative">
               <input required type="text" placeholder="Tên cơ quan, tổ chức hoặc cá nhân" value={formData.targetName} onChange={(e) => setFormData({...formData, targetName: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
@@ -326,6 +370,9 @@ export const ReportForm: React.FC = () => {
           <h3 className="text-sm font-black flex items-center gap-2 text-gray-800 uppercase tracking-wider">
             <FileText size={18} className="text-red-700" /> Chi tiết vụ việc <span className="text-red-600">*</span>
           </h3>
+          <Hint>
+            <b className="text-gray-700">Tiêu đề:</b> tóm tắt một câu, ví dụ "Xả thải ra sông tại thôn A". <b className="text-gray-700">Mô tả:</b> nêu rõ việc gì xảy ra, từ khi nào, ở đâu, ai liên quan, gây thiệt hại gì và bạn đã báo cơ quan nào chưa.
+          </Hint>
           <div className="space-y-4">
             <input required type="text" placeholder="Tiêu đề phản ánh" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-black focus:ring-2 focus:ring-red-500 outline-none" />
             <textarea required rows={5} placeholder="Mô tả chi tiết hành vi, thời gian, địa điểm..." value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none resize-none leading-relaxed" />
@@ -340,6 +387,9 @@ export const ReportForm: React.FC = () => {
             </h3>
             <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded-full">Không bắt buộc</span>
           </div>
+          <Hint>
+            Ảnh chụp, video ngắn, giấy tờ liên quan (nếu có). Tổng dung lượng tối đa 700 KB; ảnh chụp bằng điện thoại nên gửi 1–2 ảnh.
+          </Hint>
 
           <div className="space-y-4">
             <input 

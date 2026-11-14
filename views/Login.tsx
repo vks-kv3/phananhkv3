@@ -20,7 +20,7 @@ export const Login: React.FC = () => {
       const user = result.user;
       
       // Kiểm tra xem email có phải là admin không
-      if (user.email === 'vkskv3qtri@gmail.com') {
+      if (user.email === 'vksndthixabadon@gmail.com') {
         sessionStorage.setItem('isLoggedIn', 'true');
         navigate('/admin');
       } else {

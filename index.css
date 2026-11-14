@@ -19,3 +19,10 @@ body {
   .desktop-scale .text-\[12px\] { font-size: 15px; }
   .desktop-scale .text-xs        { font-size: 0.875rem; line-height: 1.25rem; }
 }
+
+/* Con trỏ bàn tay khi rê chuột vào nút, liên kết, ô chọn */
+button:not(:disabled), [role="button"], a[href], select:not(:disabled), label[for],
+input[type="checkbox"], input[type="radio"], input[type="file"], summary {
+  cursor: pointer;
+}
+button:disabled, select:disabled { cursor: not-allowed; }
