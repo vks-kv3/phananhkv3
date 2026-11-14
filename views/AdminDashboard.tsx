@@ -188,7 +188,7 @@ export const AdminDashboard = () => {
           </h3>
         </div>
 
-        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3">
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
           {reports.length === 0 ? (
             <div className="md:col-span-2 text-center py-10 bg-white rounded-3xl border border-dashed border-gray-200">
               <p className="text-xs text-gray-400 font-bold uppercase">Chưa có dữ liệu phản ánh</p>

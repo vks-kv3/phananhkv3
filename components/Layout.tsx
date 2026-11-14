@@ -23,8 +23,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <div className="w-full max-w-[480px] md:max-w-none min-h-screen bg-white md:bg-gray-50 shadow-2xl md:shadow-none flex flex-col overflow-hidden md:overflow-visible relative border-x border-gray-100 md:border-x-0">
         
         {/* Unified App Header */}
-        <header className="bg-white/80 md:bg-white backdrop-blur-md border-b h-14 md:h-20 flex items-center justify-between px-3 md:px-8 sticky top-0 z-50 md:shadow-sm">
-          <div className="w-full md:max-w-6xl md:mx-auto flex items-center justify-between gap-6">
+        <header className="bg-white/80 md:bg-white backdrop-blur-md border-b h-14 md:h-20 flex items-center justify-between px-3 md:px-8 lg:px-12 sticky top-0 z-50 md:shadow-sm">
+          <div className="w-full flex items-center justify-between gap-6">
             <Link to="/" className="flex items-center gap-2 md:gap-3 overflow-hidden flex-1">
               <div className="shrink-0">
                 <span className="md:hidden"><Logo size={24} /></span>
@@ -57,7 +57,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto md:overflow-visible overflow-x-hidden scroll-smooth pb-20 md:pb-12">
-          <div className="p-5 md:px-8 md:py-10 md:max-w-6xl md:mx-auto desktop-scale">
+          <div className="p-5 md:px-8 lg:px-12 md:py-10 desktop-scale">
             {children}
           </div>
         </main>

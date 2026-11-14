@@ -210,7 +210,7 @@ export const ReportForm: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 md:max-w-3xl md:mx-auto">
+    <div className="space-y-6 md:max-w-5xl md:mx-auto">
       <div className="text-center pt-4">
         <h1 className="text-xl font-black text-gray-900 uppercase tracking-widest">Nội dung phản ánh</h1>
         <div className="h-1 w-12 bg-red-600 mx-auto mt-2 rounded-full" />

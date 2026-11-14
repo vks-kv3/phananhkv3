@@ -10,13 +10,13 @@ export const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'vulnerable' | 'public'>('vulnerable');
 
   return (
-    <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-12 md:items-center md:min-h-[60vh]">
+    <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-12 lg:gap-20 md:items-center md:min-h-[70vh]">
       {/* Điện thoại: 'contents' để các khối con xếp theo thứ tự order; máy tính: cột trái */}
       <div className="contents md:block md:space-y-6">
       {/* Header Section */}
       <section className="order-1 text-center space-y-6 pt-4 pb-2">
         <div className="inline-flex items-center justify-center p-3 animate-in fade-in zoom-in duration-700">
-          <Logo size={130} />
+          <Logo size={150} />
         </div>
         <div className="space-y-2 px-2 md:px-0">
           <h2 className="text-red-900 font-black text-base md:text-xl uppercase tracking-tight leading-snug text-center">
@@ -37,7 +37,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Call to Action */}
-      <div className="order-3 flex flex-col items-center md:items-stretch py-4 md:max-w-md md:mx-auto md:w-full">
+      <div className="order-3 flex flex-col items-center md:items-stretch py-4 md:max-w-lg md:mx-auto md:w-full">
         <button 
           onClick={() => navigate('/report')}
           className="group relative w-full py-5 bg-red-700 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-800 transition-all flex items-center justify-center gap-3 overflow-hidden"
