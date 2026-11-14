@@ -14,15 +14,15 @@ export const Home: React.FC = () => {
       {/* Điện thoại: 'contents' để các khối con xếp theo thứ tự order; máy tính: cột trái */}
       <div className="contents md:block md:space-y-6">
       {/* Header Section */}
-      <section className="order-1 text-center md:text-left space-y-6 pt-4 pb-2">
-        <div className="inline-flex items-center justify-center p-4 bg-white rounded-[2.5rem] shadow-xl border border-red-50 animate-in fade-in zoom-in duration-700">
-          <Logo size={110} />
+      <section className="order-1 text-center space-y-6 pt-4 pb-2">
+        <div className="inline-flex items-center justify-center p-3 animate-in fade-in zoom-in duration-700">
+          <Logo size={130} />
         </div>
         <div className="space-y-2 px-2 md:px-0">
-          <h2 className="text-red-900 font-black text-lg uppercase tracking-tight leading-tight">
+          <h2 className="text-red-900 font-black text-base md:text-xl uppercase tracking-tight leading-snug text-center">
             Viện kiểm sát nhân dân tỉnh Quảng Trị
           </h2>
-          <h3 className="text-gray-700 font-bold text-base md:text-lg uppercase tracking-normal whitespace-nowrap">
+          <h3 className="text-red-900 font-black text-base md:text-xl uppercase tracking-tight leading-snug text-center">
             Viện kiểm sát nhân dân khu vực 3
           </h3>
           <div className="pt-2">
@@ -31,13 +31,13 @@ export const Home: React.FC = () => {
             </h1>
           </div>
         </div>
-        <p className="text-gray-500 italic text-xs md:text-base leading-relaxed px-6 md:px-0">
+        <p className="text-gray-500 italic text-xs md:text-base leading-relaxed px-6 md:px-4">
           Tiếp nhận phản ánh nhằm bảo vệ quyền dân sự của các chủ thể là nhóm dễ bị tổn thương, bảo vệ lợi ích công khi không có người khởi kiện.
         </p>
       </section>
 
       {/* Call to Action */}
-      <div className="order-3 flex flex-col items-center md:items-stretch py-4 md:max-w-md">
+      <div className="order-3 flex flex-col items-center md:items-stretch py-4 md:max-w-md md:mx-auto md:w-full">
         <button 
           onClick={() => navigate('/report')}
           className="group relative w-full py-5 bg-red-700 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-800 transition-all flex items-center justify-center gap-3 overflow-hidden"

@@ -327,7 +327,7 @@ export const AdminDashboard = () => {
                       value={resResponse}
                       onChange={(e) => setResResponse(e.target.value)}
                       placeholder="Nhập kết quả xử lý, căn cứ pháp lý áp dụng để thông báo cho người dân..."
-                      className="w-full p-4 bg-green-50/50 border border-green-100 rounded-2xl text-[11px] font-medium outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
+                      className="w-full p-4 bg-white border-2 border-green-300 focus:border-green-500 rounded-2xl text-[11px] font-medium outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
                     />
                   </div>
 

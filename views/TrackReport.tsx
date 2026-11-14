@@ -70,7 +70,7 @@ export const TrackReport: React.FC = () => {
           onChange={e => setCode(e.target.value)}
           placeholder="KV3-XXXX-XXXX"
           autoCapitalize="characters"
-          className="w-full p-4 bg-gray-50 rounded-2xl text-center text-lg font-black font-mono tracking-[0.15em] uppercase outline-none focus:ring-2 focus:ring-red-200"
+          className="w-full p-4 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-2xl text-center text-lg font-black font-mono tracking-[0.15em] uppercase outline-none focus:ring-2 focus:ring-red-200"
         />
         <button
           type="submit"

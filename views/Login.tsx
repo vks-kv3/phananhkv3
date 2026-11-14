@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
             <Logo size={80} />
           </div>
           <div className="space-y-1">
-            <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Cổng cán bộ nghiệp vụ</h1>
+            <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Đăng nhập quản trị</h1>
             <p className="text-[10px] font-bold text-red-700 uppercase tracking-[0.3em]">Hệ thống quản lý nội bộ</p>
           </div>
         </div>

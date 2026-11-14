@@ -280,7 +280,7 @@ export const ReportForm: React.FC = () => {
                 setFormData({...formData, subCategory: e.target.value});
                 setValidationError(null);
               }}
-              className={`w-full p-3 bg-gray-50 border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${!formData.targetType ? 'opacity-50 cursor-not-allowed' : 'border-gray-100 hover:border-gray-300'} ${validationError && !formData.subCategory && formData.targetType ? 'border-red-500' : ''}`}
+              className={`w-full p-3 bg-white border-2 rounded-xl hover:border-gray-400 focus:border-red-500 text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${!formData.targetType ? 'opacity-50 cursor-not-allowed' : 'border-gray-300'} ${validationError && !formData.subCategory && formData.targetType ? 'border-red-500' : ''}`}
             >
               <option value="" disabled>--- Vui lòng chọn danh mục chi tiết ---</option>
               {formData.targetType === ReportTargetType.VULNERABLE 
@@ -302,7 +302,7 @@ export const ReportForm: React.FC = () => {
             Thông tin của người gửi đơn để Viện kiểm sát liên hệ, xác minh khi cần. Thông tin cá nhân được giữ bí mật, chỉ cán bộ thụ lý được xem.
           </Hint>
           <div className="space-y-4">
-            <input required type="text" placeholder="Họ và tên" value={formData.citizenName} onChange={(e) => setFormData({...formData, citizenName: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+            <input required type="text" placeholder="Họ và tên" value={formData.citizenName} onChange={(e) => setFormData({...formData, citizenName: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <input 
@@ -315,7 +315,7 @@ export const ReportForm: React.FC = () => {
                     setFormData({...formData, birthYear: e.target.value});
                     if (validationError) setValidationError(null);
                   }} 
-                  className={`w-full p-3 bg-gray-50 border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Năm sinh") ? 'border-red-500 bg-red-50' : 'border-gray-100'}`} 
+                  className={`w-full p-3 bg-white border-2 rounded-xl hover:border-gray-400 focus:border-red-500 text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Năm sinh") ? 'border-red-500 bg-red-50' : 'border-gray-300'}`} 
                 />
                 <p className="text-[10px] text-gray-400 pl-1">4 chữ số, ví dụ: 1985</p>
               </div>
@@ -330,17 +330,17 @@ export const ReportForm: React.FC = () => {
                     setFormData({...formData, phoneNumber: e.target.value});
                     if (validationError) setValidationError(null);
                   }} 
-                  className={`w-full p-3 bg-gray-50 border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Số điện thoại") ? 'border-red-500 bg-red-50' : 'border-gray-100'}`} 
+                  className={`w-full p-3 bg-white border-2 rounded-xl hover:border-gray-400 focus:border-red-500 text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition-all ${validationError?.includes("Số điện thoại") ? 'border-red-500 bg-red-50' : 'border-gray-300'}`} 
                 />
                 <p className="text-[10px] text-gray-400 pl-1">Chỉ nhập số, ví dụ: 0912345678</p>
               </div>
             </div>
             <div className="space-y-1">
-              <input required type="text" placeholder="Địa chỉ thường trú" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <input required type="text" placeholder="Địa chỉ thường trú" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
               <p className="text-[10px] text-gray-400 pl-1">Ghi rõ thôn/tổ dân phố, xã/phường, tỉnh</p>
             </div>
             <div className="space-y-1">
-              <input type="email" placeholder="Email (không bắt buộc)" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <input type="email" placeholder="Email (không bắt buộc)" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
               <p className="text-[10px] text-gray-400 pl-1">Có thể bỏ trống</p>
             </div>
           </div>
@@ -356,11 +356,11 @@ export const ReportForm: React.FC = () => {
           </Hint>
           <div className="space-y-4">
             <div className="relative">
-              <input required type="text" placeholder="Tên cơ quan, tổ chức hoặc cá nhân" value={formData.targetName} onChange={(e) => setFormData({...formData, targetName: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <input required type="text" placeholder="Tên cơ quan, tổ chức hoặc cá nhân" value={formData.targetName} onChange={(e) => setFormData({...formData, targetName: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
             </div>
             <div className="relative">
               <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input required type="text" placeholder="Địa chỉ của đối tượng bị phản ánh" value={formData.targetAddress} onChange={(e) => setFormData({...formData, targetAddress: e.target.value})} className="w-full pl-10 pr-3 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
+              <input required type="text" placeholder="Địa chỉ của đối tượng bị phản ánh" value={formData.targetAddress} onChange={(e) => setFormData({...formData, targetAddress: e.target.value})} className="w-full pl-10 pr-3 py-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
             </div>
           </div>
         </div>
@@ -374,8 +374,8 @@ export const ReportForm: React.FC = () => {
             <b className="text-gray-700">Tiêu đề:</b> tóm tắt một câu, ví dụ "Xả thải ra sông tại thôn A". <b className="text-gray-700">Mô tả:</b> nêu rõ việc gì xảy ra, từ khi nào, ở đâu, ai liên quan, gây thiệt hại gì và bạn đã báo cơ quan nào chưa.
           </Hint>
           <div className="space-y-4">
-            <input required type="text" placeholder="Tiêu đề phản ánh" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-black focus:ring-2 focus:ring-red-500 outline-none" />
-            <textarea required rows={5} placeholder="Mô tả chi tiết hành vi, thời gian, địa điểm..." value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none resize-none leading-relaxed" />
+            <input required type="text" placeholder="Tiêu đề phản ánh" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-black focus:ring-2 focus:ring-red-500 outline-none" />
+            <textarea required rows={5} placeholder="Mô tả chi tiết hành vi, thời gian, địa điểm..." value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full p-3 bg-white border-2 border-gray-300 hover:border-gray-400 focus:border-red-500 rounded-xl text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none resize-none leading-relaxed" />
           </div>
         </div>
 

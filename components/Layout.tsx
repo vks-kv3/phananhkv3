@@ -14,7 +14,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { path: '/', label: 'Trang chủ', icon: <LayoutDashboard size={20} /> },
     { path: '/report', label: 'Phản ánh', icon: <FileText size={20} /> },
     { path: '/tra-cuu', label: 'Tra cứu', icon: <Search size={20} /> },
-    { path: isLoggedIn ? '/admin' : '/login', label: 'Cán bộ', icon: <Logo size={20} /> },
+    { path: isLoggedIn ? '/admin' : '/login', label: 'Quản trị', icon: <Logo size={20} /> },
   ];
 
   return (
@@ -31,8 +31,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <span className="hidden md:block"><Logo size={40} /></span>
               </div>
               <div className="flex flex-col justify-center overflow-hidden">
-                <p className="hidden md:block text-[11px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Viện kiểm sát nhân dân tỉnh Quảng Trị</p>
-                <h1 className="font-black text-red-700 text-[8px] min-[380px]:text-[9px] md:text-base uppercase leading-none md:leading-tight tracking-tighter md:tracking-normal whitespace-nowrap">
+                <p className="hidden md:block font-black text-red-700 text-sm uppercase leading-tight">Viện kiểm sát nhân dân tỉnh Quảng Trị</p>
+                <h1 className="font-black text-red-700 text-[8px] min-[380px]:text-[9px] md:text-sm uppercase leading-none md:leading-tight tracking-tighter md:tracking-normal whitespace-nowrap">
                   Viện kiểm sát nhân dân khu vực 3<span className="md:hidden">, tỉnh Quảng Trị</span>
                 </h1>
               </div>
