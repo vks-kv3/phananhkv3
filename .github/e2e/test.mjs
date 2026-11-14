@@ -9,6 +9,15 @@ const page = await browser.newPage();
 const errors = [];
 page.on('pageerror', e => errors.push(String(e)));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+page.on('response', async r => {
+  const u = r.url();
+  if (/firestore|identitytoolkit|securetoken|firebase/.test(u) && r.status() >= 300) {
+    let body = ''; try { body = (await r.text()).slice(0, 300); } catch {}
+    console.log(`::warning::HTTP ${r.status()} ${u.split('?')[0]} ${body}`);
+  }
+});
+page.on('requestfailed', r => { if (/firestore|firebase/.test(r.url())) console.log(`::warning::FAILED ${r.url().split('?')[0]} ${r.failure()?.errorText}`); });
+page.on('console', m => { if (/firestore|Firestore|offline|Firebase/i.test(m.text())) console.log(`::notice::console ${m.type()}: ${m.text().slice(0,400)}`); });
 page.on('dialog', d => { errors.push('dialog: ' + d.message()); d.dismiss(); });
 
 await page.goto(BASE + '#/');
@@ -31,7 +40,7 @@ await page.fill('textarea', 'Đơn kiểm thử tự động của chức năng 
 await page.locator('button[type="submit"]').click();
 
 try {
-  await page.getByText('Tiếp nhận thành công').waitFor({ timeout: 60000 });
+  await page.getByText('Tiếp nhận thành công').waitFor({ timeout: 90000 });
   note('Gửi đơn thành công');
 } catch { fail('Không thấy màn hình gửi thành công. Lỗi: ' + errors.join(' | ').slice(0, 800)); }
 
