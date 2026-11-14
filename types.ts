@@ -58,6 +58,31 @@ export interface Report {
   trackingCode?: string; // Mã tra cứu cấp cho người dân sau khi gửi đơn
 }
 
+// Các trường chứa thông tin cá nhân / nội dung đơn — được mã hóa khi bật mã hóa
+export const SENSITIVE_FIELDS = [
+  'reporterRole', 'citizenName', 'birthYear', 'address', 'phoneNumber', 'email',
+  'targetName', 'targetAddress', 'title', 'description', 'aiSummary', 'attachments',
+] as const;
+
+// Đơn đã mã hóa như lưu trên Firestore: chỉ còn phân loại, trạng thái và khối enc
+export interface EncryptedReportDoc {
+  id: string;
+  targetType: ReportTargetType;
+  subCategory: string;
+  status: ReportStatus;
+  createdAt: string;
+  trackingCode?: string;
+  resolutionResponse?: string;
+  resolutionAttachments?: Attachment[];
+  enc: { v: number; kid: string; key: string; iv: string; data: Uint8Array };
+}
+
+export interface EncryptionConfig {
+  publicKeyJwk: JsonWebKey;
+  fingerprint: string;
+  createdAt: string;
+}
+
 // Bản ghi công khai để người dân tra cứu tiến độ bằng mã số.
 // Chỉ chứa trạng thái và nội dung trả lời, KHÔNG chứa thông tin cá nhân.
 export interface TrackingRecord {

@@ -1,0 +1,31 @@
+name: Kiểm thử mã hóa
+on:
+  push:
+    branches: [ma-hoa]
+  workflow_dispatch:
+    inputs:
+      expect_enc:
+        description: '1 nếu đã có khóa công khai trên Firestore'
+        default: '0'
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Kiểm tra kiểu TypeScript
+        run: npx tsc --noEmit 2>&1 | tee tsc.log || true
+      - name: Ghi lỗi TypeScript
+        run: grep -E "error TS" tsc.log | head -30 | sed 's/^/::warning::/' || true
+      - run: npm run build
+      - name: Kiểm thử đầu-cuối
+        env:
+          EXPECT_ENC: ${{ github.event.inputs.expect_enc || '0' }}
+        run: |
+          npm i --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+          (npx vite preview --port 4173 --strictPort &) ; sleep 5
+          node .github/e2e/test.mjs

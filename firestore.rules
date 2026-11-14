@@ -90,6 +90,32 @@ service cloud.firestore {
         (!('trackingCode' in data) || isValidTrackingCode(data.trackingCode));
     }
 
+    // Đơn đã mã hóa: chỉ còn phân loại, trạng thái; thông tin cá nhân nằm trong khối enc
+    function isValidEncryptedReport(data) {
+      return data.keys().hasAll(['id', 'targetType', 'subCategory', 'status', 'createdAt', 'enc']) &&
+        data.keys().hasOnly(['id', 'targetType', 'subCategory', 'status', 'createdAt', 'enc', 'trackingCode', 'resolutionResponse', 'resolutionAttachments']) &&
+        data.id is string &&
+        data.targetType in ['Bảo vệ nhóm dễ bị tổn thương', 'Bảo vệ nhóm lợi ích công'] &&
+        data.subCategory is string && data.subCategory.size() > 0 && data.subCategory.size() < 200 &&
+        data.status in ['Chờ tiếp nhận', 'Đang xử lý', 'Đã giải quyết'] &&
+        isValidDateString(data.createdAt) &&
+        data.enc is map &&
+        data.enc.keys().hasOnly(['v', 'kid', 'key', 'iv', 'data']) &&
+        data.enc.keys().hasAll(['v', 'kid', 'key', 'iv', 'data']) &&
+        data.enc.v == 1 &&
+        data.enc.kid is string && data.enc.kid.size() < 40 &&
+        data.enc.key is string && data.enc.key.size() < 1000 &&
+        data.enc.iv is string && data.enc.iv.size() < 40 &&
+        data.enc.data is bytes &&
+        (!('trackingCode' in data) || isValidTrackingCode(data.trackingCode)) &&
+        (!('resolutionResponse' in data) || (data.resolutionResponse is string && data.resolutionResponse.size() < 5000)) &&
+        (!('resolutionAttachments' in data) || data.resolutionAttachments is list);
+    }
+
+    function encryptionEnabled() {
+      return exists(/databases/$(database)/documents/config/encryption);
+    }
+
     function isValidTrackingCode(code) {
       return code is string && code.matches("^KV3-[A-Z0-9]{4}-[A-Z0-9]{4}$");
     }
@@ -106,13 +132,16 @@ service cloud.firestore {
     match /reports/{reportId} {
       // Anyone can create a report (public access for reporting)
       // But we validate the data strictly
-      allow create: if isValidReport(request.resource.data);
+      // Khi đã bật mã hóa thì chỉ nhận đơn đã mã hóa
+      allow create: if (isValidReport(request.resource.data) && !encryptionEnabled()) ||
+        isValidEncryptedReport(request.resource.data);
       
       // Only admins can read all reports
       allow read: if isAdmin();
       
       // Only admins can update reports (e.g., change status, add resolution)
-      allow update: if isAdmin() && isValidReport(request.resource.data);
+      allow update: if isAdmin() &&
+        (isValidReport(request.resource.data) || isValidEncryptedReport(request.resource.data));
       
       // No one can delete reports for audit trail
       allow delete: if false;
@@ -130,6 +159,20 @@ service cloud.firestore {
       // Chỉ cán bộ được cập nhật trạng thái, trả lời
       allow update: if isAdmin() && isValidTrackingRecord(code, request.resource.data);
       allow delete: if false;
+    }
+
+    // Khóa công khai dùng để mã hóa đơn. Ai cũng đọc được (để mã hóa),
+    // chỉ quản trị viên được tạo, và chỉ tạo 1 lần (không sửa, không xóa).
+    match /config/{docId} {
+      allow get: if docId == 'encryption';
+      allow list: if false;
+      allow create: if isAdmin() && docId == 'encryption' &&
+        request.resource.data.keys().hasOnly(['publicKeyJwk', 'fingerprint', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['publicKeyJwk', 'fingerprint', 'createdAt']) &&
+        request.resource.data.publicKeyJwk is map &&
+        request.resource.data.fingerprint is string && request.resource.data.fingerprint.size() < 40 &&
+        isValidDateString(request.resource.data.createdAt);
+      allow update, delete: if false;
     }
 
     match /users/{userId} {
