@@ -30,7 +30,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <span className="md:hidden"><Logo size={24} /></span>
                 <span className="hidden md:block"><Logo size={40} /></span>
               </div>
-              <div className="flex flex-col justify-center overflow-hidden">
+              <div className="flex flex-col justify-center items-center text-center overflow-hidden">
                 <p className="hidden md:block font-black text-red-700 text-sm uppercase leading-tight">Viện kiểm sát nhân dân tỉnh Quảng Trị</p>
                 <h1 className="font-black text-red-700 text-[8px] min-[380px]:text-[9px] md:text-sm uppercase leading-none md:leading-tight tracking-tighter md:tracking-normal whitespace-nowrap">
                   Viện kiểm sát nhân dân khu vực 3<span className="md:hidden">, tỉnh Quảng Trị</span>

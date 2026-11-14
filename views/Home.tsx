@@ -1,18 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Globe, ArrowRight } from 'lucide-react';
+import { Users, Globe, ArrowRight, Lightbulb } from 'lucide-react';
 import { VULNERABLE_GROUPS, PUBLIC_INTEREST_GROUPS } from '../types';
 import { Logo } from '../components/Logo';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'vulnerable' | 'public'>('vulnerable');
 
   return (
-    <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-12 lg:gap-20 md:items-center md:min-h-[70vh]">
+    <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-12 lg:gap-20 md:items-start md:min-h-[70vh]">
       {/* Điện thoại: 'contents' để các khối con xếp theo thứ tự order; máy tính: cột trái */}
-      <div className="contents md:block md:space-y-6">
+      <div className="contents md:block md:space-y-6 md:sticky md:top-28">
       {/* Header Section */}
       <section className="order-1 text-center space-y-6 pt-4 pb-2">
         <div className="inline-flex items-center justify-center p-3 animate-in fade-in zoom-in duration-700">
@@ -55,45 +54,48 @@ export const Home: React.FC = () => {
       </div>
       </div>
 
-      {/* Explanation Section */}
+      {/* Có thể bạn chưa biết: hiện đủ cả hai nhóm đối tượng được bảo vệ */}
       <section className="order-2 bg-white rounded-[2rem] shadow-lg border border-gray-100 overflow-hidden">
-        <div className="flex border-b">
-          <button 
-            onClick={() => setActiveTab('vulnerable')}
-            className={`flex-1 py-4 px-2 font-bold text-[8px] md:text-xs flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'vulnerable' ? 'bg-red-700 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
-          >
-            <CircleUsers size={16} />
-            BẢO VỆ NHÓM DỄ BỊ TỔN THƯƠNG
-          </button>
-          <button 
-            onClick={() => setActiveTab('public')}
-            className={`flex-1 py-4 px-2 font-bold text-[8px] md:text-xs flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'public' ? 'bg-indigo-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
-          >
-            <Globe size={16} />
-            BẢO VỆ LỢI ÍCH CÔNG
-          </button>
+        <div className="bg-amber-50 border-b border-amber-100 px-5 py-4 flex gap-3 items-start">
+          <Lightbulb size={22} className="text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <h2 className="font-black text-amber-800 uppercase tracking-wide text-sm md:text-base">Có thể bạn chưa biết</h2>
+            <p className="text-[11px] text-amber-900/80 leading-relaxed mt-1">
+              Viện kiểm sát nhân dân có thể đứng ra khởi kiện để bảo vệ quyền dân sự của nhóm dễ bị tổn thương và bảo vệ lợi ích công khi không có người khởi kiện. Cụ thể gồm các trường hợp sau:
+            </p>
+          </div>
         </div>
 
-        <div className="p-5 min-h-[250px]">
-          {activeTab === 'vulnerable' ? (
-            <div className="space-y-3 animate-in fade-in slide-in-from-left duration-500">
+        <div className="p-5 space-y-6">
+          <div className="space-y-3">
+            <h3 className="flex items-center gap-2 font-black text-red-800 uppercase text-[11px] tracking-wide">
+              <span className="w-7 h-7 rounded-full bg-red-700 text-white flex items-center justify-center shrink-0"><CircleUsers size={14} /></span>
+              Bảo vệ nhóm dễ bị tổn thương, gồm:
+            </h3>
+            <div className="space-y-2">
               {VULNERABLE_GROUPS.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-transparent hover:border-red-100 transition-all">
-                  <div className="mt-1 w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                <div key={i} className="flex items-start gap-3 p-3 bg-red-50/50 rounded-xl border border-red-100/60">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
                   <span className="text-[11px] font-semibold text-gray-700 leading-snug">{item}</span>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="space-y-3 animate-in fade-in slide-in-from-right duration-500">
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="flex items-center gap-2 font-black text-indigo-900 uppercase text-[11px] tracking-wide">
+              <span className="w-7 h-7 rounded-full bg-indigo-900 text-white flex items-center justify-center shrink-0"><Globe size={14} /></span>
+              Bảo vệ lợi ích công, trong các lĩnh vực:
+            </h3>
+            <div className="space-y-2">
               {PUBLIC_INTEREST_GROUPS.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-transparent hover:border-indigo-100 transition-all">
-                  <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
+                <div key={i} className="flex items-start gap-3 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100/60">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
                   <span className="text-[11px] font-semibold text-gray-700 leading-snug">{item}</span>
                 </div>
               ))}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
