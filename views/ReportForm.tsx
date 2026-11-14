@@ -124,6 +124,13 @@ export const ReportForm: React.FC = () => {
         attachments: attachments,
         trackingCode: generateTrackingCode(),
       };
+      // Bỏ email nếu để trống: quy tắc Firestore chỉ chấp nhận email đúng định dạng,
+      // gửi chuỗi rỗng sẽ khiến cả đơn bị từ chối lưu.
+      if (!newReport.email || !newReport.email.trim()) {
+        delete newReport.email;
+      } else {
+        newReport.email = newReport.email.trim();
+      }
 
       await saveReport(newReport);
       const trackingOk = await createTrackingRecord(newReport);
