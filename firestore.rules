@@ -1,0 +1,118 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: reports
+    // Document ID: random string (report.id)
+    // Fields:
+    //   - id: string (required)
+    //   - targetType: string (required)
+    //   - reporterRole: string (optional)
+    //   - subCategory: string (required)
+    //   - citizenName: string (required)
+    //   - birthYear: string (required)
+    //   - address: string (required)
+    //   - phoneNumber: string (required)
+    //   - email: string (optional)
+    //   - targetName: string (required)
+    //   - targetAddress: string (required)
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - status: string (required)
+    //   - createdAt: string (required, ISO 8601)
+    //   - aiSummary: string (optional)
+    //   - attachments: list of maps (optional)
+    //   - resolutionResponse: string (optional)
+    //   - resolutionAttachments: list of maps (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "vkskv3qtri@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+        dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidReport(data) {
+      return hasRequiredFields(['id', 'targetType', 'subCategory', 'citizenName', 'birthYear', 'address', 'phoneNumber', 'targetName', 'targetAddress', 'title', 'description', 'status', 'createdAt']) &&
+        data.id is string &&
+        data.targetType in ['Bảo vệ nhóm dễ bị tổn thương', 'Bảo vệ nhóm lợi ích công'] &&
+        data.subCategory is string && data.subCategory.size() > 0 && data.subCategory.size() < 200 &&
+        data.citizenName is string && data.citizenName.size() > 0 && data.citizenName.size() < 100 &&
+        data.birthYear is string && data.birthYear.matches("^\\d{4}$") &&
+        data.address is string && data.address.size() > 0 && data.address.size() < 500 &&
+        data.phoneNumber is string && data.phoneNumber.size() >= 10 && data.phoneNumber.size() <= 15 &&
+        data.targetName is string && data.targetName.size() > 0 && data.targetName.size() < 200 &&
+        data.targetAddress is string && data.targetAddress.size() > 0 && data.targetAddress.size() < 500 &&
+        data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+        data.description is string && data.description.size() > 0 && data.description.size() < 5000 &&
+        data.status in ['Chờ tiếp nhận', 'Đang xử lý', 'Đã giải quyết'] &&
+        isValidDateString(data.createdAt) &&
+        (!('email' in data) || isValidEmail(data.email)) &&
+        (!('aiSummary' in data) || (data.aiSummary is string && data.aiSummary.size() < 2000)) &&
+        (!('attachments' in data) || data.attachments is list) &&
+        (!('resolutionResponse' in data) || (data.resolutionResponse is string && data.resolutionResponse.size() < 5000)) &&
+        (!('resolutionAttachments' in data) || data.resolutionAttachments is list);
+    }
+
+    match /reports/{reportId} {
+      // Anyone can create a report (public access for reporting)
+      // But we validate the data strictly
+      allow create: if isValidReport(request.resource.data);
+      
+      // Only admins can read all reports
+      allow read: if isAdmin();
+      
+      // Only admins can update reports (e.g., change status, add resolution)
+      allow update: if isAdmin() && isValidReport(request.resource.data);
+      
+      // No one can delete reports for audit trail
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      // Only system/admin can create/update user roles (simplified for this app)
+      allow write: if isAdmin();
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

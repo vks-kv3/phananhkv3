@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "Report": {
+      "title": "Report",
+      "description": "A report submitted by a citizen regarding vulnerable groups or public interest.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["Bảo vệ nhóm dễ bị tổn thương", "Bảo vệ nhóm lợi ích công"] },
+        "reporterRole": { "type": "string", "enum": ["Bản thân", "Người thân"] },
+        "subCategory": { "type": "string" },
+        "citizenName": { "type": "string" },
+        "birthYear": { "type": "string" },
+        "address": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "targetName": { "type": "string" },
+        "targetAddress": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Chờ tiếp nhận", "Đang xử lý", "Đã giải quyết"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "aiSummary": { "type": "string" },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "size": { "type": "number" },
+              "data": { "type": "string" }
+            }
+          }
+        },
+        "resolutionResponse": { "type": "string" },
+        "resolutionAttachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "size": { "type": "number" },
+              "data": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["id", "targetType", "subCategory", "citizenName", "birthYear", "address", "phoneNumber", "targetName", "targetAddress", "title", "description", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "reports": {
+      "schema": "Report",
+      "description": "Collection of reports submitted by citizens."
+    }
+  }
+}

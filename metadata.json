@@ -1,0 +1,8 @@
+{
+  "name": "Remix: totungcongich",
+  "description": "Ứng dụng hỗ trợ người dân gửi phản ánh đến Viện kiểm sát nhân dân khu vực 3, tỉnh Quảng Trị về bảo vệ nhóm yếu thế và lợi ích công cộng.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
