@@ -38,7 +38,8 @@ await page.fill('input[placeholder="Địa chỉ của đối tượng bị ph�
 await page.fill('input[placeholder="Tiêu đề phản ánh"]', '[THỬ NGHIỆM] Kiểm tra mã hóa - xin bỏ qua');
 await page.fill('textarea', 'Đơn kiểm thử tự động của chức năng mã tra cứu. Không phải phản ánh thật.');
 const EXPECT_ENC = process.env.EXPECT_ENC === '1';
-const lockBanner = await page.getByText('Thông tin của bạn được mã hóa').count();
+let lockBanner = 0;
+try { await page.getByText('Thông tin của bạn được mã hóa').first().waitFor({ timeout: EXPECT_ENC ? 15000 : 4000 }); lockBanner = 1; } catch {}
 if (EXPECT_ENC && !lockBanner) fail('Không thấy thông báo mã hóa trên biểu mẫu');
 if (!EXPECT_ENC && lockBanner) fail('Thông báo mã hóa hiện ra khi chưa bật mã hóa');
 note('Chế độ ' + (EXPECT_ENC ? 'CÓ' : 'KHÔNG') + ' mã hóa; thông báo mã hóa: ' + (lockBanner ? 'có' : 'không'));
