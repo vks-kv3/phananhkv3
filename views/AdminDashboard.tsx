@@ -1,14 +1,30 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Report, ReportStatus, ReportTargetType, Attachment } from '../types';
+import { Report, ReportStatus, ReportTargetType, Attachment, EncryptedReportDoc, EncryptionConfig } from '../types';
 import { Scale, Users, FileCheck, AlertTriangle, MessageSquare, Eye, PieChart, TrendingUp, Filter, ChevronRight, CheckCircle, Paperclip, File, Image as ImageIcon, Film, Download, RefreshCcw, UserX, MapPin, Send, X, Plus, LogOut } from 'lucide-react';
-import { getAllReports, updateReportStatus as dbUpdateStatus, subscribeToReports } from '../services/storageService';
+import { updateReportStatus as dbUpdateStatus, subscribeToReports, getEncryptionConfig } from '../services/storageService';
+import { decryptObject } from '../services/cryptoService';
+import { EncryptionPanel, LoadedKey } from '../components/EncryptionPanel';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
+// Giữ chìa khóa đã mở trong phiên làm việc (chỉ trong bộ nhớ, không lưu xuống máy)
+let sessionKey: LoadedKey | null = null;
+
+type ViewReport = Report & { encrypted?: boolean; locked?: boolean };
+
 export const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [reports, setReports] = useState<Report[]>([]);
+  const [rawReports, setRawReports] = useState<(Report | EncryptedReportDoc)[]>([]);
+  const [encConfig, setEncConfig] = useState<EncryptionConfig | null>(null);
+  const [encConfigLoaded, setEncConfigLoaded] = useState(false);
+  const [loadedKey, setLoadedKeyState] = useState<LoadedKey | null>(sessionKey);
+  const [decrypted, setDecrypted] = useState<Record<string, Partial<Report>>>({});
+  const setLoadedKey = (k: LoadedKey | null) => {
+    sessionKey = k;
+    setLoadedKeyState(k);
+    if (!k) setDecrypted({});
+  };
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [resResponse, setResResponse] = useState('');
@@ -17,11 +33,60 @@ export const AdminDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeToReports((data) => {
-      setReports(data);
+      setRawReports(data);
       setLoading(false);
     });
+    getEncryptionConfig()
+      .then(setEncConfig)
+      .catch(() => setEncConfig(null))
+      .finally(() => setEncConfigLoaded(true));
     return () => unsubscribe();
   }, []);
+
+  // Giải mã các đơn đã mã hóa khi có chìa khóa phù hợp
+  useEffect(() => {
+    if (!loadedKey) return;
+    let cancelled = false;
+    (async () => {
+      const updates: Record<string, Partial<Report>> = {};
+      for (const r of rawReports) {
+        if (!('enc' in r) || decrypted[r.id] || r.enc.kid !== loadedKey.fingerprint) continue;
+        try {
+          updates[r.id] = await decryptObject<Partial<Report>>(r.enc, loadedKey.privateKey);
+        } catch (e) {
+          console.error('Không giải mã được đơn', r.id, e);
+        }
+      }
+      if (!cancelled && Object.keys(updates).length) setDecrypted(prev => ({ ...prev, ...updates }));
+    })();
+    return () => { cancelled = true; };
+  }, [rawReports, loadedKey]);
+
+  // Danh sách để hiển thị: đơn thường giữ nguyên, đơn mã hóa ghép phần đã giải mã
+  const reports: ViewReport[] = rawReports.map(r => {
+    if (!('enc' in r)) return r as ViewReport;
+    const { enc, ...meta } = r;
+    const plain = decrypted[r.id];
+    if (plain) return { ...(meta as any), ...plain, encrypted: true } as ViewReport;
+    return {
+      ...(meta as any),
+      encrypted: true,
+      locked: true,
+      title: 'Đơn đã mã hóa',
+      citizenName: loadedKey && enc.kid !== loadedKey.fingerprint ? `Cần chìa khóa ${enc.kid}` : 'Mở chìa khóa để xem',
+      birthYear: '', address: '', phoneNumber: '', targetName: '', targetAddress: '', description: '',
+    } as ViewReport;
+  });
+  const lockedCount = reports.filter(r => r.locked).length;
+
+  // Cập nhật khung chi tiết khi đơn vừa được giải mã / trạng thái thay đổi
+  useEffect(() => {
+    if (!selectedReport) return;
+    const fresh = reports.find(r => r.id === selectedReport.id);
+    if (fresh && (fresh.locked !== (selectedReport as ViewReport).locked || fresh.status !== selectedReport.status)) {
+      setSelectedReport(fresh);
+    }
+  });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -66,15 +131,7 @@ export const AdminDashboard = () => {
       const resolutionAttachments = newStatus === ReportStatus.RESOLVED ? resAttachments : undefined;
       await dbUpdateStatus(reportId, newStatus, newStatus === ReportStatus.RESOLVED ? resResponse : undefined, resolutionAttachments, trackingCode);
       
-      const updatedReports = reports.map(report => 
-        report.id === reportId ? { 
-          ...report, 
-          status: newStatus, 
-          resolutionResponse: newStatus === ReportStatus.RESOLVED ? resResponse : report.resolutionResponse,
-          resolutionAttachments: newStatus === ReportStatus.RESOLVED ? resAttachments : report.resolutionAttachments
-        } : report
-      );
-      setReports(updatedReports);
+      // Danh sách tự cập nhật qua kết nối thời gian thực với Firestore
       
       // Nếu trạng thái là Đã giải quyết (Hoàn tất), đóng modal để quay lại danh sách
       if (newStatus === ReportStatus.RESOLVED) {
@@ -155,6 +212,15 @@ export const AdminDashboard = () => {
         </button>
       </div>
 
+      <EncryptionPanel
+        config={encConfig}
+        configLoaded={encConfigLoaded}
+        loadedKey={loadedKey}
+        lockedCount={lockedCount}
+        onConfigCreated={setEncConfig}
+        onKeyLoaded={setLoadedKey}
+      />
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="col-span-2 md:col-span-1 bg-red-900 text-white p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
           <div className="relative z-10">
@@ -209,6 +275,7 @@ export const AdminDashboard = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
+                    {report.encrypted && <span title={report.locked ? 'Đã mã hóa' : 'Đã giải mã'}>{report.locked ? '🔒' : '🔓'}</span>}
                     <h4 className="text-xs font-black text-gray-900 truncate uppercase">{report.title}</h4>
                     {report.attachments && report.attachments.length > 0 && <Paperclip size={10} className="text-gray-400" />}
                   </div>
@@ -245,6 +312,11 @@ export const AdminDashboard = () => {
             </div>
 
             <div className="space-y-4">
+              {(selectedReport as ViewReport).locked && (
+                <div className="bg-slate-100 border border-slate-200 p-4 rounded-2xl text-[11px] text-slate-800 font-semibold">
+                  🔒 Nội dung đơn đã được mã hóa. Bấm “Mở chìa khóa” ở đầu trang quản trị và chọn tệp chìa khóa để xem. Vẫn cập nhật được trạng thái và trả lời mà không cần mở.
+                </div>
+              )}
               {/* AI Summary Section */}
               <div className="bg-red-50 p-4 rounded-2xl space-y-2 border border-red-100">
                 <div className="flex items-center gap-2 text-[10px] font-black text-red-800 uppercase tracking-widest">

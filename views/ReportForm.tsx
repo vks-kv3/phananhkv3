@@ -1,10 +1,11 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, CheckCircle2, Copy, Search, User, UserX, FileText, AlertCircle, Info, Paperclip, X, File, Image as ImageIcon, Film, MapPin } from 'lucide-react';
-import { ReportTargetType, ReportStatus, VULNERABLE_GROUPS, PUBLIC_INTEREST_GROUPS, Report, Attachment } from '../types';
+import { Send, CheckCircle2, Copy, Search, Lock, User, UserX, FileText, AlertCircle, Info, Paperclip, X, File, Image as ImageIcon, Film, MapPin } from 'lucide-react';
+import { ReportTargetType, ReportStatus, VULNERABLE_GROUPS, PUBLIC_INTEREST_GROUPS, Report, Attachment, SENSITIVE_FIELDS, EncryptionConfig } from '../types';
 import { analyzeReport } from '../services/geminiService';
-import { saveReport, createTrackingRecord, generateTrackingCode } from '../services/storageService';
+import { saveReport, saveEncryptedReport, createTrackingRecord, generateTrackingCode, getEncryptionConfig } from '../services/storageService';
+import { encryptObject } from '../services/cryptoService';
 
 // Dòng chú thích hướng dẫn người dân điền đơn
 const Hint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -24,6 +25,12 @@ export const ReportForm: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [trackingCode, setTrackingCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // Khóa công khai của Viện kiểm sát; có khóa thì đơn được mã hóa trước khi gửi
+  const [encConfig, setEncConfig] = useState<EncryptionConfig | null>(null);
+
+  useEffect(() => {
+    getEncryptionConfig().then(setEncConfig).catch(() => setEncConfig(null));
+  }, []);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   
@@ -150,7 +157,26 @@ export const ReportForm: React.FC = () => {
         newReport.email = newReport.email.trim();
       }
 
-      await saveReport(newReport);
+      // Lấy lại cấu hình ngay lúc gửi để chắc chắn dùng khóa mới nhất
+      const config = await getEncryptionConfig().catch(() => encConfig);
+      if (config) {
+        const secret: Record<string, unknown> = {};
+        for (const f of SENSITIVE_FIELDS) {
+          if ((newReport as any)[f] !== undefined) secret[f] = (newReport as any)[f];
+        }
+        const enc = await encryptObject(secret, config.publicKeyJwk);
+        await saveEncryptedReport({
+          id: newReport.id,
+          targetType: newReport.targetType,
+          subCategory: newReport.subCategory,
+          status: newReport.status,
+          createdAt: newReport.createdAt,
+          trackingCode: newReport.trackingCode,
+          enc,
+        });
+      } else {
+        await saveReport(newReport);
+      }
       const trackingOk = await createTrackingRecord(newReport);
       setTrackingCode(trackingOk ? newReport.trackingCode! : null);
 
@@ -436,6 +462,15 @@ export const ReportForm: React.FC = () => {
             )}
           </div>
         </div>
+
+        {encConfig && (
+          <div className="p-4 bg-green-50 rounded-2xl flex gap-3 border border-green-100">
+            <Lock className="text-green-700 shrink-0" size={16} />
+            <p className="text-[11px] text-green-900 leading-relaxed">
+              <b>Thông tin của bạn được mã hóa</b> ngay trên thiết bị này trước khi gửi đi. Chỉ cán bộ Viện kiểm sát có chìa khóa giải mã mới đọc được.
+            </p>
+          </div>
+        )}
 
         <div className="p-4 bg-red-50 rounded-2xl flex gap-3 border border-red-100">
           <AlertCircle className="text-red-600 shrink-0" size={16} />

@@ -10,13 +10,45 @@ import {
   onSnapshot,
   setDoc,
   getDoc,
-  getDocFromServer
+  getDocFromServer,
+  Bytes
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Report, ReportStatus, Attachment, TrackingRecord } from '../types';
+import { Report, ReportStatus, Attachment, TrackingRecord, EncryptedReportDoc, EncryptionConfig } from '../types';
 
 const COLLECTION_NAME = 'reports';
 const TRACKING_COLLECTION = 'tracking';
+const ENCRYPTION_CONFIG = ['config', 'encryption'] as const;
+
+// Đổi kiểu Bytes của Firestore sang Uint8Array cho khối dữ liệu mã hóa
+const fromFirestore = (data: any): Report | EncryptedReportDoc => {
+  if (data?.enc?.data instanceof Bytes) {
+    return { ...data, enc: { ...data.enc, data: data.enc.data.toUint8Array() } };
+  }
+  return data;
+};
+
+// Khóa công khai dùng để mã hóa đơn (null nếu chưa bật mã hóa)
+export const getEncryptionConfig = async (): Promise<EncryptionConfig | null> => {
+  const snap = await getDoc(doc(db, ...ENCRYPTION_CONFIG));
+  return snap.exists() ? (snap.data() as EncryptionConfig) : null;
+};
+
+// Chỉ quản trị viên: lưu khóa công khai để bật mã hóa (quy tắc chỉ cho tạo 1 lần)
+export const setEncryptionConfig = async (config: EncryptionConfig): Promise<void> => {
+  await setDoc(doc(db, ...ENCRYPTION_CONFIG), config);
+};
+
+export const saveEncryptedReport = async (report: EncryptedReportDoc): Promise<void> => {
+  try {
+    await setDoc(doc(db, COLLECTION_NAME, report.id), {
+      ...report,
+      enc: { ...report.enc, data: Bytes.fromUint8Array(report.enc.data) },
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `${COLLECTION_NAME}/${report.id}`);
+  }
+};
 
 // Bảng chữ không có ký tự dễ nhầm (0/O, 1/I/L) để người dân đọc, chép lại dễ dàng
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -143,10 +175,10 @@ export const getAllReports = async (): Promise<Report[]> => {
   }
 };
 
-export const subscribeToReports = (callback: (reports: Report[]) => void) => {
+export const subscribeToReports = (callback: (reports: (Report | EncryptedReportDoc)[]) => void) => {
   const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
-    const reports = snapshot.docs.map(doc => doc.data() as Report);
+    const reports = snapshot.docs.map(d => fromFirestore(d.data()));
     callback(reports);
   }, (error) => {
     handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
